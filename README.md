@@ -12,7 +12,9 @@ npm install -g canary-runner
 
 ## Usage
 
-See `canary --help`
+See `canary --help`.
+
+Set the `CANARY_PAT` environment variable if you want to access private repositories over https (see CI-usage section)
 
 Examples:
 
@@ -36,15 +38,15 @@ Or any mix of the above
 
 CLI usage relies on SSH for accessing private repositories, which works fine on your own machine.
 
-For CI usage, define a github PAT and store it as a secret accessible from the repository where the CI lives.
+For CI usage, define a github PAT with read rights to the repositories you will test, and store it as a secret accessible from the repository where the CI lives.
 
-Example USAGE:
+Example usage:
 
 ```
     - run: npm install canary-runner
     - run: npx canary --config holepunchto/canary-tests/repos.json # Replace with your own config
       env:
-        PAT: ${{ secrets.CANARY_READ_REPOS_PAT }} # Ensure this secret exists and is a valid PAT
+        CANARY_PAT: ${{ secrets.CANARY_READ_REPOS_PAT }} # Ensure this secret exists and is a valid PAT
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       working-directory: ${{ github.workspace }} # Where the checkout action checked it out
 ```
