@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "description": "Run all tests of a list of repositories",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "bin.js",
+    "lib"
+  ],
   "scripts": {
     "test": "standard && brittle test/test.js"
   },
