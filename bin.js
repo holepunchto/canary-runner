@@ -40,7 +40,7 @@ const run = command(
       }
     }
     if (run.rest) {
-      for (const repo of run.rest) repos.push(repo)
+      for (const repo of run.rest) repos.push({ name: repo })
     }
 
     if (repos.length === 0) {
@@ -58,7 +58,7 @@ const run = command(
 
     let exit = 0
     for (const repo of repos) {
-      console.log(`Testing ${repo}`)
+      console.log(`Testing ${repo.name}`)
       await test(repo)
     }
 
