@@ -65,6 +65,7 @@ const run = command(
     console.log('\n\n--- Canary Test Summary ---\n\n')
     console.log(`Tested ${repos.length} repositories`)
     console.log(c.getFailureSummary({ detailed }))
+    console.log('\n\n--- End of Summary ---\n\n')
 
     process.exit(exit)
 
