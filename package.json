@@ -1,6 +1,6 @@
 {
   "name": "canary-runner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Run all tests of a list of repositories",
   "main": "index.js",
   "files": [
