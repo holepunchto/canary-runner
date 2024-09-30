@@ -11,6 +11,9 @@
   "scripts": {
     "test": "standard && brittle test/test.js"
   },
+  "bin": {
+    "canary": "./bin.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/holepunchto/canary-runner.git"
