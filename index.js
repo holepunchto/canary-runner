@@ -31,9 +31,9 @@ module.exports = class CanaryRunner {
     }
   }
 
-  async test (gitRepo) {
-    gitRepo = this._normalizeGitRepo(gitRepo)
-
+  async test (repoInfo) {
+    const gitRepo = this._normalizeGitRepo(repoInfo.name)
+    const scripts = ['test', ...(repoInfo.additionalNpmScripts || [])]
     const folder = path.join(this.dir, '' + (++this.runs) + '-' + Math.random().toString(16).slice(2))
 
     await rm(folder)
@@ -75,17 +75,23 @@ module.exports = class CanaryRunner {
         } catch {}
       }
 
-      result = await this._run(repo, 'npm', 'test')
+      let runOverview = null
+      for (const script of scripts) {
+        result = await this._run(repo, 'npm', 'run', script)
 
-      const runOverview = {
-        step: 'npm-test',
-        failed: result.code !== 0,
-        code: result.code,
-        stdout: result.stdout,
-        stderr: result.stderr
+        runOverview = {
+          step: `npm-${script}`,
+          failed: result.code !== 0,
+          code: result.code,
+          stdout: result.stdout,
+          stderr: result.stderr
+        }
+
+        this.result.add(runOverview)
+
+        // Bail on first failure
+        if (runOverview.failed) return runOverview
       }
-
-      this.result.add(runOverview)
 
       return runOverview
     } finally {
@@ -106,10 +112,14 @@ module.exports = class CanaryRunner {
 
     const file = await fs.promises.readFile(path.join(folder, 'repo', location))
     const repos = JSON.parse(file)
-    if (!Array.isArray(repos)) throw new Error('The config must be an array')
 
     const res = []
-    for (const repo of repos) res.push(repo)
+    for (const [name, extraInfo] of Object.entries(repos)) {
+      res.push({
+        name,
+        additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || [])
+      })
+    }
 
     return res
   }

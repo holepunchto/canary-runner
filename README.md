@@ -50,3 +50,21 @@ Example usage:
         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       working-directory: ${{ github.workspace }} # Where the checkout action checked it out
 ```
+
+## Config format
+
+An example .json config format (for the --config flag):
+
+```
+{
+  "holepunchto/hypercore": {},
+  "holepunchto/hyperbee": {},
+  "holepunchto/hyperdht": {
+    "additionalNpmScripts": [
+      "integration"
+    ]
+  }
+}
+```
+
+The entries under `additionalNpmScripts` will all be run (as `npm run <entryname>`). `npm run test` is always run and need not be specified.
