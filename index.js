@@ -39,31 +39,45 @@ module.exports = class CanaryRunner {
     await rm(folder)
     await mkdir(folder)
 
+    const baseResult = {
+      repo: repoInfo.name
+    }
+
     let result = null
 
     try {
       result = await this._run(folder, 'git', 'clone', gitRepo, 'repo')
       if (result.code !== 0) {
-        return {
+        const runOverview = {
+          ...baseResult,
           step: 'clone',
           failed: true,
           code: result.code,
           stdout: result.stdout,
           stderr: result.stderr
         }
+
+        result.add(runOverview)
+
+        return runOverview
       }
 
       const repo = path.join(folder, 'repo')
 
       result = await this._run(repo, 'npm', 'install')
       if (result.code !== 0) {
-        return {
+        const runOverview = {
+          ...baseResult,
           step: 'npm-install',
           failed: true,
           code: result.code,
           stdout: result.stdout,
           stderr: result.stderr
         }
+
+        result.add(runOverview)
+
+        return runOverview
       }
 
       for (const [name, folder] of this.overwrites) {
@@ -80,6 +94,7 @@ module.exports = class CanaryRunner {
         result = await this._run(repo, 'npm', 'run', script)
 
         runOverview = {
+          ...baseResult,
           step: `npm-${script}`,
           failed: result.code !== 0,
           code: result.code,

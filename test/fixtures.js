@@ -1,5 +1,11 @@
+const baseRunInfo = {
+  repoName: 'holepunchto/hypercore'
+}
+
 const passingRun = {
+  ...baseRunInfo,
   failed: false,
+  step: 'npm run test',
   code: 0,
   stdout: `> hyperbee-diff-stream@1.0.4 test
 > standard && brittle test/*.js --coverage
@@ -211,7 +217,9 @@ ok 29 - example works # time = 122.182061ms
 }
 
 const failingTestsRun = {
+  ...baseRunInfo,
   failed: true,
+  step: 'npm run test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
@@ -480,7 +488,9 @@ ok 29 - example works # time = 117.839728ms
 }
 
 const timeoutRun = {
+  ...baseRunInfo,
   failed: true,
+  step: 'npm run test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
@@ -513,7 +523,9 @@ Node.js v22.7.0`
 }
 
 const errorRun = {
+  ...baseRunInfo,
   failed: true,
+  step: 'npm run test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
@@ -546,9 +558,27 @@ Error: break test
     at async Test._run (/home/hans/holepunch/hyperbee-diff-stream/node_modules/brittle/index.js:577:7)`
 }
 
+const npmIFailedRun = {
+  ...baseRunInfo,
+  failed: true,
+  code: 1,
+  step: 'npm i',
+  stdout: '',
+  stderr: `npm ERR! code ECONNRESET
+npm ERR! errno ECONNRESET
+npm ERR! network Invalid response body while trying to fetch https://registry.npmjs.org/protomux: aborted
+npm ERR! network This is a problem related to network connectivity.
+npm ERR! network In most cases you are behind a proxy or have bad network settings.
+npm ERR! network
+npm ERR! network If you are behind a proxy, please make sure that the
+npm ERR! network 'proxy' config is set properly.  See: 'npm help config'
+`
+}
+
 module.exports = {
   passingRun,
   failingTestsRun,
   timeoutRun,
-  errorRun
+  errorRun,
+  npmIFailedRun
 }

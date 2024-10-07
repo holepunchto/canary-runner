@@ -1,17 +1,17 @@
-const t = require('brittle')
-const { passingRun, failingTestsRun, timeoutRun, errorRun } = require('./fixtures')
+const test = require('brittle')
+const { npmIFailedRun, passingRun, failingTestsRun, timeoutRun, errorRun } = require('./fixtures')
 const Result = require('../lib/result')
 
-const DEBUG = false
+const DEBUG = true
 
-t('passing tests summary', t => {
+test('passing tests summary', t => {
   const result = new Result()
   result.add(passingRun)
 
   t.is(result.getSummary().trim(), '0 repositories with failures')
 })
 
-t('failing tests summary', t => {
+test('failing tests summary', t => {
   const result = new Result()
   result.add(passingRun)
   result.add(failingTestsRun)
@@ -28,7 +28,7 @@ t('failing tests summary', t => {
   )
 })
 
-t('test timeout summary', t => {
+test('test timeout summary', t => {
   const result = new Result()
   result.add(passingRun)
   result.add(timeoutRun)
@@ -44,7 +44,7 @@ t('test timeout summary', t => {
   )
 })
 
-t('test error summary', t => {
+test('test error summary', t => {
   const result = new Result()
   result.add(passingRun)
   result.add(errorRun)
@@ -60,4 +60,27 @@ t('test error summary', t => {
   )
 
   if (DEBUG) console.log(result.getSummary({ detailed: true }))
+})
+
+test('test npm i error summary', t => {
+  const result = new Result()
+  result.add(npmIFailedRun)
+
+  if (DEBUG) console.log(result.getSummary())
+
+  t.is(
+    result.getSummary().trim(),
+    `1 repositories with failures
+
+holepunchto/hypercore had an unexpected failure during preliminary step 'npm i'
+
+npm ERR! code ECONNRESET
+npm ERR! errno ECONNRESET
+npm ERR! network Invalid response body while trying to fetch https://registry.npmjs.org/protomux: aborted
+npm ERR! network This is a problem related to network connectivity.
+npm ERR! network In most cases you are behind a proxy or have bad network settings.
+npm ERR! network
+npm ERR! network If you are behind a proxy, please make sure that the
+npm ERR! network 'proxy' config is set properly.  See: 'npm help config'`
+  )
 })
