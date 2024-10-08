@@ -64,6 +64,23 @@ module.exports = class CanaryRunner {
 
       const repo = path.join(folder, 'repo')
 
+      result = await this._run(repo, 'git', 'rev-parse', 'HEAD')
+      if (result.code !== 0) {
+        const runOverview = {
+          ...baseResult,
+          step: 'get-git-commit-hash',
+          failed: true,
+          code: result.code,
+          stdout: result.stdout,
+          stderr: result.stderr
+        }
+
+        result.add(runOverview)
+        return runOverview
+      }
+
+      baseResult.gitHash = result.stdout.trim()
+
       result = await this._run(repo, 'npm', 'install')
       if (result.code !== 0) {
         const runOverview = {
@@ -95,7 +112,7 @@ module.exports = class CanaryRunner {
 
         runOverview = {
           ...baseResult,
-          step: `npm-${script}`,
+          step: `npm-run-${script}`,
           failed: result.code !== 0,
           code: result.code,
           stdout: result.stdout,

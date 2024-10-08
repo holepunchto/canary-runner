@@ -1,11 +1,12 @@
 const baseRunInfo = {
-  repoName: 'holepunchto/hypercore'
+  repoName: 'holepunchto/hypercore',
+  gitHash: '657b7068d6b16856311c33ff35f906e7d3d1d479'
 }
 
 const passingRun = {
   ...baseRunInfo,
   failed: false,
-  step: 'npm run test',
+  step: 'npm-run-test',
   code: 0,
   stdout: `> hyperbee-diff-stream@1.0.4 test
 > standard && brittle test/*.js --coverage
@@ -219,7 +220,7 @@ ok 29 - example works # time = 122.182061ms
 const failingTestsRun = {
   ...baseRunInfo,
   failed: true,
-  step: 'npm run test',
+  step: 'npm-run-test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
@@ -490,7 +491,7 @@ ok 29 - example works # time = 117.839728ms
 const timeoutRun = {
   ...baseRunInfo,
   failed: true,
-  step: 'npm run test',
+  step: 'npm-run-test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
@@ -525,7 +526,7 @@ Node.js v22.7.0`
 const errorRun = {
   ...baseRunInfo,
   failed: true,
-  step: 'npm run test',
+  step: 'npm-run-test',
   code: 1,
   stdout: `
 > hyperbee-diff-stream@1.0.4 test
