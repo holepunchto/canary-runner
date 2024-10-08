@@ -40,7 +40,8 @@ module.exports = class CanaryRunner {
     await mkdir(folder)
 
     const baseResult = {
-      repo: repoInfo.name
+      repo: repoInfo.name,
+      gitHash: 'unknown' // Extracted in a later step
     }
 
     let result = null
