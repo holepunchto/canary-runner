@@ -10,13 +10,13 @@ module.exports = class CanaryRunner {
     this.log = true
     this.runs = 0
     this.activeProcesses = new Set()
-    this.result = new Result()
+    this.resultOverview = new Result()
 
     this.accessToken = accessToken || null
   }
 
   getFailureSummary ({ detailed = false } = {}) {
-    return this.result.getSummary({ detailed })
+    return this.resultOverview.getSummary({ detailed })
   }
 
   overwrite (name, dir) {
@@ -58,7 +58,7 @@ module.exports = class CanaryRunner {
           stderr: result.stderr
         }
 
-        result.add(runOverview)
+        this.resultOverview.add(runOverview)
 
         return runOverview
       }
@@ -76,7 +76,7 @@ module.exports = class CanaryRunner {
           stderr: result.stderr
         }
 
-        result.add(runOverview)
+        this.resultOverview.add(runOverview)
         return runOverview
       }
 
@@ -93,7 +93,7 @@ module.exports = class CanaryRunner {
           stderr: result.stderr
         }
 
-        result.add(runOverview)
+        this.resultOverview.add(runOverview)
 
         return runOverview
       }
@@ -120,7 +120,7 @@ module.exports = class CanaryRunner {
           stderr: result.stderr
         }
 
-        this.result.add(runOverview)
+        this.resultOverview.add(runOverview)
 
         // Bail on first failure
         if (runOverview.failed) return runOverview
