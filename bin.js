@@ -58,8 +58,10 @@ const run = command(
 
     let exit = 0
     for (const repo of repos) {
-      console.log(`Testing ${repo.name}`)
-      await test(repo)
+      for (const branch of repo.branches) {
+        console.log(`Testing ${repo.name}#${branch}`)
+        await test(repo, branch)
+      }
     }
 
     console.log('\n\n--- Canary Test Summary ---\n\n')
@@ -69,8 +71,8 @@ const run = command(
 
     process.exit(exit)
 
-    async function test (repo) {
-      const res = await c.test(repo)
+    async function test (repo, branch) {
+      const res = await c.test(repo, branch)
       if (res.failed) exit = 1
     }
   }
