@@ -1,5 +1,6 @@
 const baseRunInfo = {
-  repoName: 'holepunchto/hypercore',
+  branch: 'main',
+  repo: 'holepunchto/hypercore',
   gitHash: '657b7068d6b16856311c33ff35f906e7d3d1d479'
 }
 

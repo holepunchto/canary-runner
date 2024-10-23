@@ -31,7 +31,7 @@ module.exports = class CanaryRunner {
     }
   }
 
-  async test (repoInfo) {
+  async test (repoInfo, branch = 'main') {
     const gitRepo = this._normalizeGitRepo(repoInfo.name)
     const scripts = ['test', ...(repoInfo.additionalNpmScripts || [])]
     const folder = path.join(this.dir, '' + (++this.runs) + '-' + Math.random().toString(16).slice(2))
@@ -40,6 +40,7 @@ module.exports = class CanaryRunner {
     await mkdir(folder)
 
     const baseResult = {
+      branch,
       repo: repoInfo.name,
       gitHash: 'unknown' // Extracted in a later step
     }
@@ -64,6 +65,21 @@ module.exports = class CanaryRunner {
       }
 
       const repo = path.join(folder, 'repo')
+
+      result = await this._run(repo, 'git', 'checkout', branch)
+      if (result.code !== 0) {
+        const runOverview = {
+          ...baseResult,
+          step: 'checkout-branch',
+          failed: true,
+          code: result.code,
+          stdout: result.stdout,
+          stderr: result.stderr
+        }
+
+        this.resultOverview.add(runOverview)
+        return runOverview
+      }
 
       result = await this._run(repo, 'git', 'rev-parse', 'HEAD')
       if (result.code !== 0) {
@@ -150,7 +166,8 @@ module.exports = class CanaryRunner {
     for (const [name, extraInfo] of Object.entries(repos)) {
       res.push({
         name,
-        additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || [])
+        additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || []),
+        branches: Array.from(extraInfo.branches || ['main'])
       })
     }
 
