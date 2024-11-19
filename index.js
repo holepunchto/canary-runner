@@ -151,27 +151,31 @@ module.exports = class CanaryRunner {
   async getJsonFromRepo (repo, location) {
     repo = this._normalizeGitRepo(repo)
 
-    const folder = path.join(this.dir, 'repo-with-config')
+    const folder = path.join(this.dir, `repo-with-config-${Math.random().toString(16).slice(2)}`)
 
     await rm(folder)
     await mkdir(folder)
 
-    const result = await this._run(folder, 'git', 'clone', repo, 'repo')
-    if (result.failed) throw new Error('Could not clone repo where the config lives')
+    try {
+      const result = await this._run(folder, 'git', 'clone', repo, 'repo')
+      if (result.failed) throw new Error('Could not clone repo where the config lives')
 
-    const file = await fs.promises.readFile(path.join(folder, 'repo', location))
-    const repos = JSON.parse(file)
+      const file = await fs.promises.readFile(path.join(folder, 'repo', location))
+      const repos = JSON.parse(file)
 
-    const res = []
-    for (const [name, extraInfo] of Object.entries(repos)) {
-      res.push({
-        name,
-        additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || []),
-        branches: Array.from(extraInfo.branches || ['main'])
-      })
+      const res = []
+      for (const [name, extraInfo] of Object.entries(repos)) {
+        res.push({
+          name,
+          additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || []),
+          branches: Array.from(extraInfo.branches || ['main'])
+        })
+      }
+
+      return res
+    } finally {
+      await rm(folder)
     }
-
-    return res
   }
 
   async _run (dir, program, ...args) {
