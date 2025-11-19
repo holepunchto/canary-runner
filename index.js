@@ -105,7 +105,7 @@ module.exports = class CanaryRunner {
       try {
         await fs.promises.access(lockfileLoc)
       } catch (e) {
-        if (!e.code === 'ENOENT') throw e
+        if (e.code !== 'ENOENT') throw e
         hasLockFile = false
       }
 
