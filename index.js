@@ -42,6 +42,7 @@ module.exports = class CanaryRunner {
     const baseResult = {
       branch,
       repo: repoInfo.name,
+      locklessRun: false,
       gitHash: 'unknown' // Extracted in a later step
     }
 
@@ -98,54 +99,78 @@ module.exports = class CanaryRunner {
 
       baseResult.gitHash = result.stdout.trim()
 
-      result = await this._run(repo, 'npm', 'install')
-      if (result.code !== 0) {
-        const runOverview = {
-          ...baseResult,
-          step: 'npm-install',
-          failed: true,
-          code: result.code,
-          stdout: result.stdout,
-          stderr: result.stderr
-        }
+      const lockfileLoc = path.join(repo, 'package-lock.json')
 
-        this.resultOverview.add(runOverview)
-
-        return runOverview
-      }
-
-      for (const [name, folder] of this.overwrites) {
-        if (this.log) console.log('Injecting', folder, 'as', name)
-        const nm = path.join(repo, 'node_modules', name)
-        await rm(nm)
-        try {
-          await fs.promises.symlink(folder, nm)
-        } catch {}
+      let hasLockFile = true
+      try {
+        await fs.promises.access(lockfileLoc)
+      } catch (e) {
+        if (!e.code === 'ENOENT') throw e
+        hasLockFile = false
       }
 
       let runOverview = null
-      for (const script of scripts) {
-        result = await this._run(repo, 'npm', 'run', script)
+      runOverview = await this.installAndRunTests(repo, scripts, baseResult)
 
-        runOverview = {
-          ...baseResult,
-          step: `npm-run-${script}`,
-          failed: result.code !== 0,
-          code: result.code,
-          stdout: result.stdout,
-          stderr: result.stderr
-        }
-
-        this.resultOverview.add(runOverview)
-
-        // Bail on first failure
-        if (runOverview.failed) return runOverview
+      // If tests already failed, we don't bother running them on latest dependencies
+      if (!runOverview.failed && hasLockFile) {
+        await rm(lockfileLoc)
+        baseResult.locklessRun = true
+        runOverview = await this.installAndRunTests(repo, scripts, baseResult)
       }
 
       return runOverview
     } finally {
       await rm(folder)
     }
+  }
+
+  async installAndRunTests (repo, scripts, baseResult) {
+    let result = await this._run(repo, 'npm', 'install')
+    if (result.code !== 0) {
+      const runOverview = {
+        ...baseResult,
+        step: 'npm-install',
+        failed: true,
+        code: result.code,
+        stdout: result.stdout,
+        stderr: result.stderr
+      }
+
+      this.resultOverview.add(runOverview)
+
+      return runOverview
+    }
+
+    for (const [name, folder] of this.overwrites) {
+      if (this.log) console.log('Injecting', folder, 'as', name)
+      const nm = path.join(repo, 'node_modules', name)
+      await rm(nm)
+      try {
+        await fs.promises.symlink(folder, nm)
+      } catch {}
+    }
+
+    let runOverview = null
+    for (const script of scripts) {
+      result = await this._run(repo, 'npm', 'run', script)
+
+      runOverview = {
+        ...baseResult,
+        step: `npm-run-${script}`,
+        failed: result.code !== 0,
+        code: result.code,
+        stdout: result.stdout,
+        stderr: result.stderr
+      }
+
+      this.resultOverview.add(runOverview)
+
+      // Bail on first failure
+      if (runOverview.failed) return runOverview
+    }
+
+    return runOverview
   }
 
   async getJsonFromRepo (repo, location) {
