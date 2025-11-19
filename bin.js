@@ -40,7 +40,7 @@ const run = command(
       }
     }
     if (run.rest) {
-      for (const repo of run.rest) repos.push({ name: repo })
+      for (const repo of run.rest) repos.push({ name: repo, branches: ['main'] })
     }
 
     if (repos.length === 0) {
