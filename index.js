@@ -115,6 +115,7 @@ module.exports = class CanaryRunner {
       // If tests already failed, we don't bother running them on latest dependencies
       if (!runOverview.failed && hasLockFile) {
         await rm(lockfileLoc)
+        await rm(path.join(path.dirname(lockfileLoc), 'node_modules'))
         baseResult.locklessRun = true
         runOverview = await this.installAndRunTests(repo, scripts, baseResult)
       }
