@@ -3,6 +3,7 @@
 const Canary = require('./')
 const { command, summary, flag, rest } = require('paparam')
 const os = require('os')
+const fs = require('fs')
 const path = require('path')
 const graceful = require('graceful-goodbye')
 
@@ -52,6 +53,12 @@ const run = command(
       for (const o of run.flags.overwrite.split(',')) {
         const [name, folder] = o.split('=').map(s => s.trim())
         if (!name || !folder) continue
+        try {
+          fs.accessSync(folder)
+        } catch {
+          console.error(`Overwrite "${folder}" for ${name} can't be accessed either because it doesn't exist or you don't have permission.`)
+          process.exit(1)
+        }
         c.overwrite(name, folder)
       }
     }
