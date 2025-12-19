@@ -524,6 +524,44 @@ Error: Test timed out after 100 ms
 Node.js v22.7.0`
 }
 
+const nestedWErrorAtEndRun = {
+  ...baseRunInfo,
+  failed: true,
+  step: 'npm-run-test',
+  code: 1,
+  stdout: `> some-package@1.2.3 test
+> bare test/index.js
+
+TAP version 13
+
+# basic - foo
+    ok 1 - should be equal
+ok 1 - basic - foo # time = 755ms
+
+# [main] thread test
+TAP version 13
+
+# [thread] works
+    ok 1 - should be equal
+ok 1 - [thread] works # time = 2912ms
+
+1..1
+# tests = 1/1 pass
+# asserts = 1/1 pass
+# time = 2914ms
+
+# ok
+ok 2 - [main] thread test # time = 4030ms
+
+# test that will time out
+    ok 1 - should not be equal
+`,
+  stderr: `
+Uncaught (in promise) Error: Test timed out after 30000 ms
+    at ontimeout (file:///tmp/holepunch-canary/29-ba0567aec758e/repo/node_modules/brittle/index.js:330:19)
+    at Scheduler._ontimeout (bare:/bare.js:2653:17)`
+}
+
 const errorRun = {
   ...baseRunInfo,
   failed: true,
@@ -582,5 +620,6 @@ module.exports = {
   failingTestsRun,
   timeoutRun,
   errorRun,
+  nestedWErrorAtEndRun,
   npmIFailedRun
 }

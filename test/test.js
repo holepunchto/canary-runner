@@ -1,5 +1,5 @@
 const test = require('brittle')
-const { npmIFailedRun, passingRun, failingTestsRun, timeoutRun, errorRun } = require('./fixtures')
+const { npmIFailedRun, passingRun, failingTestsRun, timeoutRun, errorRun, nestedWErrorAtEndRun } = require('./fixtures')
 const Result = require('../lib/result')
 
 const DEBUG = false
@@ -57,6 +57,23 @@ test('test error summary', t => {
 
 > hyperbee-diff-stream@1.0.4 test for branch main (commit hash 657b7068d6b16856311c33ff35f906e7d3d1d479)
   - [TEST ERROR] new bee forked, but no old fork nor changes to index`
+  )
+
+  if (DEBUG) console.log(result.getSummary({ detailed: true }))
+})
+
+test('nested test error summary', t => {
+  const result = new Result()
+  result.add(nestedWErrorAtEndRun)
+
+  if (DEBUG) console.log(result.getSummary())
+
+  t.is(
+    result.getSummary().trim(),
+    `1 repositories with failures
+
+> some-package@1.2.3 test for branch main (commit hash 657b7068d6b16856311c33ff35f906e7d3d1d479)
+  - [TEST ERROR] test that will time out`
   )
 
   if (DEBUG) console.log(result.getSummary({ detailed: true }))
