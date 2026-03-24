@@ -35,6 +35,7 @@ const run = command(
       const configStartChar = Math.max(config.lastIndexOf('/'), 0)
       const gitRepo = config.slice(0, configStartChar)
       const reposJsonLoc = config.slice(configStartChar)
+      console.log(`Loading config file from ${config}`)
       for (const repo of await c.loadRepos(gitRepo, reposJsonLoc)) {
         repos.push(repo)
       }
