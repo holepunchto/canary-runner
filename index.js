@@ -174,19 +174,25 @@ module.exports = class CanaryRunner {
     return runOverview
   }
 
-  async getJsonFromRepo (repo, location) {
-    repo = this._normalizeGitRepo(repo)
-
-    const folder = path.join(this.dir, `repo-with-config-${Math.random().toString(16).slice(2)}`)
-
-    await rm(folder)
-    await mkdir(folder)
+  async loadRepos (repo, location) {
+    let folder = null
 
     try {
-      const result = await this._run(folder, 'git', 'clone', repo, 'repo')
-      if (result.failed) throw new Error('Could not clone repo where the config lives')
+      if (repo) {
+        repo = this._normalizeGitRepo(repo)
 
-      const file = await fs.promises.readFile(path.join(folder, 'repo', location))
+        folder = path.join(this.dir, `repo-with-config-${Math.random().toString(16).slice(2)}`)
+
+        await rm(folder)
+        await mkdir(folder)
+
+        const result = await this._run(folder, 'git', 'clone', repo, 'repo')
+        if (result.failed) throw new Error('Could not clone repo where the config lives')
+
+        location = path.join(folder, 'repo', location)
+      }
+
+      const file = await fs.promises.readFile(location, 'utf-8')
       const repos = JSON.parse(file)
 
       const res = []
@@ -200,7 +206,7 @@ module.exports = class CanaryRunner {
 
       return res
     } finally {
-      await rm(folder)
+      if (folder) await rm(folder)
     }
   }
 

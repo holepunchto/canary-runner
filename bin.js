@@ -12,7 +12,7 @@ const run = command(
   summary('Runs all tests in a list of repos to see if something broke'),
   flag('--overwrite|-o <module-name=./path>', 'Overwrite a module to a local folder, to check if you broke anything'),
   flag('--detailed', 'Enable detailed output of failing tests (defaults to just the title)'),
-  flag('--config <repo_to_clone/repos.json>', 'Link to a file in a github repository where the config lives. (e.g. holepunchto/canary-tests/repos.json)'),
+  flag('--config <repos.json>', 'Path to a local JSON file or a file in a github repository (e.g. repos.json or holepunchto/canary-tests/repos.json)'),
   rest('additional repos (use --config to use a default list)'),
   async () => {
     const tmp = os.tmpdir()
@@ -32,11 +32,10 @@ const run = command(
       // DEVNOTE: currently, only top-level files are supported
       // If you want to support a file at /config/config.json, change this code
       const config = run.flags.config
-      const configStartChar = config.lastIndexOf('/')
+      const configStartChar = Math.max(config.lastIndexOf('/'), 0)
       const gitRepo = config.slice(0, configStartChar)
       const reposJsonLoc = config.slice(configStartChar)
-      console.log(`Loading config file from git repo ${gitRepo}`)
-      for (const repo of await c.getJsonFromRepo(gitRepo, reposJsonLoc)) {
+      for (const repo of await c.loadRepos(gitRepo, reposJsonLoc)) {
         repos.push(repo)
       }
     }
