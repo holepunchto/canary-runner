@@ -186,22 +186,27 @@ module.exports = class CanaryRunner {
       const result = await this._run(folder, 'git', 'clone', repo, 'repo')
       if (result.failed) throw new Error('Could not clone repo where the config lives')
 
-      const file = await fs.promises.readFile(path.join(folder, 'repo', location))
-      const repos = JSON.parse(file)
-
-      const res = []
-      for (const [name, extraInfo] of Object.entries(repos)) {
-        res.push({
-          name,
-          additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || []),
-          branches: Array.from(extraInfo.branches || ['main'])
-        })
-      }
-
-      return res
+      const jsonPath = path.join(folder, 'repo', location)
+      return await this._parseJSONToRepos(jsonPath)
     } finally {
       await rm(folder)
     }
+  }
+
+  async _parseJSONToRepos (path) {
+    const file = await fs.promises.readFile(path)
+    const repos = JSON.parse(file)
+
+    const res = []
+    for (const [name, extraInfo] of Object.entries(repos)) {
+      res.push({
+        name,
+        additionalNpmScripts: Array.from(extraInfo.additionalNpmScripts || []),
+        branches: Array.from(extraInfo.branches || ['main'])
+      })
+    }
+
+    return res
   }
 
   async _run (dir, program, ...args) {
