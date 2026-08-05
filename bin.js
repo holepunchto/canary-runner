@@ -13,6 +13,7 @@ const run = command(
   flag('--overwrite|-o <module-name=./path>', 'Overwrite a module to a local folder, to check if you broke anything'),
   flag('--detailed', 'Enable detailed output of failing tests (defaults to just the title)'),
   flag('--config <repo_to_clone/repos.json>', 'Link to a file in a github repository where the config lives. (e.g. holepunchto/canary-tests/repos.json)'),
+  flag('--install-command <command>', 'Overwrite the \'npm install\' command (args with a white space are not supported)'),
   rest('additional repos (use --config to use a default list)'),
   async () => {
     const tmp = os.tmpdir()
@@ -67,7 +68,7 @@ const run = command(
     for (const repo of repos) {
       for (const branch of repo.branches) {
         console.log(`Testing ${repo.name}#${branch}`)
-        await test(repo, branch)
+        await test(repo, branch, run.flags.installCommand)
       }
     }
 
@@ -78,8 +79,8 @@ const run = command(
 
     process.exit(exit)
 
-    async function test (repo, branch) {
-      const res = await c.test(repo, branch)
+    async function test (repo, branch, install) {
+      const res = await c.test(repo, branch, install)
       if (res.failed) exit = 1
     }
   }

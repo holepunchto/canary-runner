@@ -31,7 +31,7 @@ module.exports = class CanaryRunner {
     }
   }
 
-  async test (repoInfo, branch = 'main') {
+  async test (repoInfo, branch = 'main', install) {
     const gitRepo = this._normalizeGitRepo(repoInfo.name)
     const scripts = ['test', ...(repoInfo.additionalNpmScripts || [])]
     const folder = path.join(this.dir, '' + (++this.runs) + '-' + Math.random().toString(16).slice(2))
@@ -110,14 +110,14 @@ module.exports = class CanaryRunner {
       }
 
       let runOverview = null
-      runOverview = await this.installAndRunTests(repo, scripts, baseResult)
+      runOverview = await this.installAndRunTests(repo, scripts, baseResult, install)
 
       // If tests already failed, we don't bother running them on latest dependencies
       if (!runOverview.failed && hasLockFile) {
         await rm(lockfileLoc)
         await rm(path.join(path.dirname(lockfileLoc), 'node_modules'))
         baseResult.locklessRun = true
-        runOverview = await this.installAndRunTests(repo, scripts, baseResult)
+        runOverview = await this.installAndRunTests(repo, scripts, baseResult, install)
       }
 
       return runOverview
@@ -126,8 +126,10 @@ module.exports = class CanaryRunner {
     }
   }
 
-  async installAndRunTests (repo, scripts, baseResult) {
-    let result = await this._run(repo, 'npm', 'install')
+  async installAndRunTests (repo, scripts, baseResult, install = 'npm install') {
+    // the install command here will not work if an arg with a white space was passed
+    // e.g. `npm instal --prefix 'path/to/my folder'` would split wrongly
+    let result = await this._run(repo, ...install.split(' '))
     if (result.code !== 0) {
       const runOverview = {
         ...baseResult,

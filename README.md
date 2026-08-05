@@ -30,6 +30,9 @@ canary holepunchto/some-repo --overwrite hypercore=./my-dev/hypercore
 
 # run the canary on 2 repos
 canary holepunchto/some-repo holepunchto/some-other-repo
+
+# run the canary with a custom install command
+canary --install-command 'sfw npm install --ignore-scripts --allow-git=root' holepunchto/some-repo 
 ```
 
 Or any mix of the above
