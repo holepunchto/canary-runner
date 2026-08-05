@@ -13,7 +13,7 @@ const run = command(
   flag('--overwrite|-o <module-name=./path>', 'Overwrite a module to a local folder, to check if you broke anything'),
   flag('--detailed', 'Enable detailed output of failing tests (defaults to just the title)'),
   flag('--config <repo_to_clone/repos.json>', 'Link to a file in a github repository where the config lives. (e.g. holepunchto/canary-tests/repos.json)'),
-  flag('--install-command <command>', 'Overwrite the \'npm install \' command'),
+  flag('--install-command <command>', 'Overwrite the \'npm install\' command (args with a white space are not supported)'),
   rest('additional repos (use --config to use a default list)'),
   async () => {
     const tmp = os.tmpdir()
