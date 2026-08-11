@@ -33,12 +33,26 @@ const run = command(
       // DEVNOTE: currently, only top-level files are supported
       // If you want to support a file at /config/config.json, change this code
       const config = run.flags.config
-      const configStartChar = config.lastIndexOf('/')
-      const gitRepo = config.slice(0, configStartChar)
-      const reposJsonLoc = config.slice(configStartChar)
-      console.log(`Loading config file from git repo ${gitRepo}`)
-      for (const repo of await c.getJsonFromRepo(gitRepo, reposJsonLoc)) {
-        repos.push(repo)
+
+      let isGitRepo = true
+      try {
+        fs.accessSync(config)
+        isGitRepo = false
+      } catch {}
+
+      if (isGitRepo) {
+        const configStartChar = config.lastIndexOf('/')
+        const gitRepo = config.slice(0, configStartChar)
+        const reposJsonLoc = config.slice(configStartChar)
+        console.log(`Loading config file from git repo ${gitRepo}`)
+        for (const repo of await c.getJsonFromRepo(gitRepo, reposJsonLoc)) {
+          repos.push(repo)
+        }
+      } else {
+        const jsonPath = config
+        for (const repo of await c._parseJSONToRepos(jsonPath)) {
+          repos.push(repo)
+        }
       }
     }
     if (run.rest) {
