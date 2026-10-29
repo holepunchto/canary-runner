@@ -77,7 +77,7 @@ const run = command(
     console.log(c.getFailureSummary({ detailed }))
     console.log('\n\n--- End of Summary ---\n\n')
 
-    process.exit(exit)
+    process.stdout.write('', () => process.exit(exit))
 
     async function test (repo, branch, install) {
       const res = await c.test(repo, branch, install)
